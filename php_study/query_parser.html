@@ -1,0 +1,385 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Query parser</title>
+    <style>
+        label {
+            padding: 0 10px;
+        }
+    </style>
+    <meta name="description" content="Slicer">
+
+    <script type="application/javascript">
+
+
+        //----------------------------------------------------------------------------------------DOMContentLoaded_start
+        document.addEventListener("DOMContentLoaded", ready);
+
+        function ready() {
+            var classname = document.getElementsByClassName("action");
+            Array.from(classname).forEach(function (element) {
+                element.addEventListener('click', sliceData);
+                element.addEventListener('keyup', sliceData);
+            });
+        }
+        //------------------------------------------------------------------------------------------DOMContentLoaded_end
+
+        //----------------------------------------------------------------------------------------global variables_start
+        var toReplace = {
+            "whitespase": "{whitespase}"
+        };
+
+        //var query_type; //insert select update
+        var keys_list = [];
+        var values_list = [];
+        //------------------------------------------------------------------------------------------global variables_end
+
+        //---------------------------------------------------------------------------------------------entry point_start
+        function sliceData() {
+            console.log('-------------------------------------------------------------------------------');
+
+            //get our text field
+            var query = document.getElementById('textField').value;
+            if (query) {
+                //delete comments from query
+                var string = {};
+                string.original = query.replace(/--.*\n/g, '').trim();
+                string.originalLower = string.original.toLowerCase();
+                string.collapsed = collapseWhiteSpaces(string.original);
+                string.collapsedLower = collapseWhiteSpaces(string.originalLower).toLowerCase();
+
+
+                //extract data
+                var query_type = extractQueryType(string); //insert select update
+                console.log(query_type);
+
+                if (query_type == 'insert') {
+                    var tableName = extractTableName_insert(string);
+                    var columnNames = extractColumnNames_insert(string);
+                    var columnValues = extractColumnValues_insert(string, string);
+                    buildInsertQuery(tableName, columnNames, columnValues);
+                } else if (query_type == 'select') {
+
+                    getQueryInfoSelect(string);
+
+                    //готово
+                //    var tableName = extractTableName_select(string.original, string.originalLower);
+                    //готово
+                //    var columnNames = extractColumnNames_select(string.original, string.originalLower);
+                    //готово
+                 //   var whereCondition = extractWhereCondition_select(string.original, string.originalLower);
+                  //  var joins = extractJoins_select(string.original, string.originalLower);
+                 //   console.log('tableName->' + tableName);
+                 //   console.log('columnNames->' + columnNames);
+                 //   console.log('joins->' + joins);
+                 //   console.log('whereCondition->' + whereCondition);
+                 //   buildSelectQuery(tableName, columnNames, whereCondition);
+                } else if (query_type == 'update') {
+
+                }
+            }
+        }
+        //-----------------------------------------------------------------------------------------------entry point_end
+
+        //---------------------------------------------------------------------------------------general functions_start
+        //tabs, spaces, new lines
+        function clearWhiteSpaces(string) {
+            return string.replace(/\s/g, '');
+        }
+
+        //tabs, spaces, new lines
+        function collapseWhiteSpaces(string) {
+            return string.replace(/\s\s+/g, ' ').trim();
+        }
+
+        //get query type
+        function extractQueryType(string) {
+            return string.collapsedLower.substr(0, 6);
+        }
+        //-----------------------------------------------------------------------------------------general functions_end
+
+        //--------------------------------------------------------------------------------------------------select_start
+        function getQueryInfoSelect(string) {
+            var stringCombined = string.original.substring(0,string.originalLower.indexOf('from'))+string.collapsed.substr(string.collapsedLower.indexOf('from'));
+            console.log('stringCombined',stringCombined);
+
+            var stringCombinedLower = stringCombined.toLowerCase();
+
+            var selectSP = stringCombinedLower.indexOf('select');
+            var fromSP = stringCombinedLower.indexOf('from');
+
+            var joinSP = stringCombinedLower.indexOf('join');
+            var joinLeftSP = stringCombinedLower.indexOf('left join');
+            var joinRightSP = stringCombinedLower.indexOf('right join');
+            var whereSP = stringCombinedLower.indexOf('where');
+            var groupBySP = stringCombinedLower.indexOf('group by');
+            var orderBySP = stringCombinedLower.indexOf('order by');
+
+            var endTablePosition = [joinSP,joinLeftSP,joinRightSP,whereSP,groupBySP,orderBySP].clean(-1);
+            var endJoinPosition = [whereSP,groupBySP,orderBySP].clean(-1);
+            var endWherePosition = [groupBySP,orderBySP].clean(-1);
+            var endGroupByPosition = [orderBySP].clean(-1);
+            var endOrderByPosition = stringCombined.length;
+
+            var positions = {};
+
+            console.log(endTablePosition);
+            console.log('stringCombined.length',stringCombined.length);
+
+            positions.columns = {
+                'start': 7,
+                'end': fromSP
+            };
+
+            positions.table = {
+                'start': positions.columns.end+4,
+                'end': endTablePosition.length == 0 ? stringCombined.length : endTablePosition.min()
+            };
+
+            positions.joins = {
+                'start': positions.table.end,
+                'end': endJoinPosition.length == 0 ? stringCombined.length : endJoinPosition.min()
+            };
+
+            positions.where = {
+                'start': positions.joins.end,
+                'end': endWherePosition.length == 0 ? stringCombined.length : endWherePosition.min()
+            };
+
+            positions.groupBy = {
+                'start': positions.where.end,
+                'end': endGroupByPosition.length == 0 ? stringCombined.length : endGroupByPosition.min()
+            };
+
+            positions.orderBy = {
+                'start': positions.groupBy.end,
+                'end': endOrderByPosition
+            };
+
+            for (var prop in positions) {
+                console.log("obj." + prop);
+                positions[prop].block = stringCombined.substring(positions[prop].start, positions[prop].end).trim();
+            }
+
+            console.log(positions);
+            console.log(positions.joins.block.split(/join/));
+
+
+
+
+
+
+
+        }
+
+        function extractTableName_select(string) {
+
+
+            var from_index = string.originalLower.indexOf('from') + 5;
+
+
+            var to_index = string.originalLower.indexOf('\n', from_index);
+            if (to_index != -1) {
+                return string.original.slice(from_index, to_index);
+            }
+            return string.original.slice(from_index, to_index);
+        }
+
+        function extractColumnNames_select(string) {
+            var from_index = string.originalLower.indexOf('select') + 7;
+            var to_index = string.originalLower.indexOf('from', from_index);
+            return string.original.slice(from_index, to_index).trim();
+        }
+
+        function extractWhereCondition_select(string) {
+            if (string.originalLower.indexOf('where') != -1) {
+                var from_index = string.originalLower.indexOf('where') + 6;
+                return string.original.slice(from_index).trim();
+            }
+
+            return '';
+        }
+
+        function extractJoins_select(string) {
+            var from_index = string.originalLower.indexOf('\n', string.originalLower.indexOf('from'));
+            var to_index = string.originalLower.indexOf('where');
+            var joins;
+
+            if (to_index != -1) {
+                joins = string.original.slice(from_index, to_index).trim()
+            } else {
+                joins = string.original.slice(from_index).trim()
+            }
+            if (joins.toLowerCase().indexOf('join') != -1) {
+                return joins;
+            }
+            return '';
+
+        }
+
+        //----------------------------------------------------------------------------------------------------select_end
+
+
+        //--------------------------------------------------------------------------------------------------insert_start
+        function buildInsertQuery(tableName, columnNames, columnValues) {
+            console.log('buildInsertQuery');
+            var html = '';
+            columnNames.forEach(function (item, i) {
+                html += '"' + item + '"=>' + columnValues[i] + ',\n'
+            });
+            html = html.slice(0, html.length - 2);
+            html = "$insertData = array(\n" + html + "\n);";
+            html += '\n$this->db->insert("' + tableName + '", $insertData);';
+            document.getElementById("query").innerHTML = html;
+        }
+
+        function extractTableName_insert(string) {
+            var tableStartPosition = 12; //insert into
+            var tableEndPosition = string.collapsedLower.indexOf('(') - 1; //insert into
+            var tableName = string.collapsedLower.substr(tableStartPosition, tableEndPosition - tableStartPosition);
+            console.log('extractTableName_insert', '(' + tableName + ')');
+            return tableName;
+        }
+
+        function extractColumnNames_insert(string) {
+            var tableStartPosition = string.collapsed.indexOf('(') + 1; //insert into
+            var tableEndPosition = string.collapsed.indexOf(')'); //insert into
+            var columnsString = string.collapsed.substr(tableStartPosition, tableEndPosition - tableStartPosition);
+            return handleColumns_insert(columnsString);
+        }
+
+        function extractColumnValues_insert(string) {
+            var tableStartPosition;
+            var tableEndPosition;
+            var valuesString;
+            if (string.collapsedLower.indexOf('values') != -1) {
+                tableStartPosition = string.collapsed.indexOf('(', string.collapsedLower.indexOf('values')) + 1;
+                tableEndPosition = string.collapsed.lastIndexOf(')');
+                valuesString = string.collapsed.substr(tableStartPosition, tableEndPosition - tableStartPosition);
+            } else if (string.collapsedLower.indexOf('select') != -1) {
+                tableStartPosition = string.collapsedLower.indexOf('select') + 6;
+                tableEndPosition = string.collapsed.length;
+                valuesString = string.collapsed.substr(tableStartPosition, tableEndPosition - tableStartPosition);
+            }
+            return handleValues_insert(valuesString);
+        }
+
+        function handleColumns_insert(columnsString) {
+            columnsString = clearWhiteSpaces(columnsString.replace(/\s|\[|\]/g, ''));
+            console.log('handleColumns_insert', '(' + columnsString + ')');
+            console.log(columnsString.split(',').clean(''));
+            return columnsString.split(',').clean('');
+        }
+
+        function handleValues_insert(valuesString) {
+            console.log('handleValues_insert', '(' + valuesString + ')');
+            var valuesArray = valuesString.split(',');
+            var resultArray = [];
+            valuesArray.forEach(function (val) {
+                val = val.trim();
+                if (!isNaN(val)) {
+                    resultArray.push(val)
+                } else if (val.indexOf('$') != -1) {
+                    val = val.replace(/\{/g, '');
+                    val = val.replace(/\}/g, '');
+                    val = val.replace(/"/g, '');
+                    val = val.replace(/^'/, '');
+                    val = val.replace(/'$/, '');
+                    val = '"{' + val + '}"';
+                    resultArray.push(val)
+                } else if (val.indexOf('getdate') != -1) {
+                    val = 'date("Y-m-d H:i:s")';
+                    resultArray.push(val)
+                } else if (val == '') {
+                    resultArray.push('')
+                } else {
+                    if (val.indexOf(' --') != -1) {
+                        val = val.substr(0, val.indexOf(' --'))
+                    }
+                    val = val.replace(/"/g, '');
+                    val = val.replace(/^'/, '');
+                    val = val.replace(/'$/, '');
+                    val = '"' + val + '"';
+                    resultArray.push(val)
+                }
+            });
+            //  console.log(resultArray);
+            //  console.log(valuesArray);
+            return resultArray;
+        }
+        //----------------------------------------------------------------------------------------------------insert_end
+        function buildSelectQuery(tableName, columnNames, whereCondition) {
+
+            return;
+            if (columnNames.trim() == "*") {
+
+            } else {
+
+            }
+
+            console.log('buildSelectQuery');
+            var html = '';
+            columnNames.forEach(function (item, i) {
+                html += '"' + item + '"=>' + whereCondition[i] + ',\n'
+            });
+            html = html.slice(0, html.length - 2);
+            html = "$insertData = array(\n" + html + "\n);";
+            html += '\n$this->db->insert("' + tableName + '", $insertData);';
+            document.getElementById("query").innerHTML = html;
+        }
+
+        //----------------------------------------------------------------------------------------------prototypes_start
+        Array.prototype.clean = function (deleteValue) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == deleteValue) {
+                    this.splice(i, 1);
+                    i--;
+                }
+            }
+            return this;
+        };
+
+        Array.prototype.contains = function (v) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] === v) return true;
+            }
+            return false;
+        };
+
+        Array.prototype.unique = function () {
+            var arr = [];
+            for (var i = 0; i < this.length; i++) {
+                if (!arr.contains(this[i])) {
+                    arr.push(this[i]);
+                }
+            }
+            return arr;
+        };
+
+        Array.prototype.max = function() {
+            return Math.max.apply(null, this);
+        };
+
+        Array.prototype.min = function() {
+            return Math.min.apply(null, this);
+        };
+        //------------------------------------------------------------------------------------------------prototypes_end
+    </script>
+</head>
+
+<body>
+<div class="page-header">
+    <h1>Query parser</h1>
+</div>
+<div class='error_block'></div>
+<form class="form-horizontal">
+    <textarea class="action form-control" placeholder="Текст" id="textField"
+              cols="50" rows="15"></textarea><br>
+</form>
+<pre>
+    <div id='query'></div>
+</pre>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Slicer</title>
+    <style>
+        label {
+            padding: 0 10px;
+        }
+    </style>
+    <meta name="description" content="Slicer">
+
+    <script type="application/javascript">
+        document.addEventListener("DOMContentLoaded", ready);
+
+        function ready() {
+            var classname = document.getElementsByClassName("action");
+
+            Array.from(classname).forEach(function(element) {
+                element.addEventListener('click', sliceData);
+                element.addEventListener('keyup', sliceData);
+            });
+
+            document.getElementById('toKeys').addEventListener('click', buildArrayView);
+            document.getElementById('toValues').addEventListener('click', buildArrayView);
+
+        }
+
+        var toReplace = {
+            "splitters_space": " ",
+            "splitters_enter": "\n",
+            "splitters_tab": "    ",
+            "splitters_regexp": function () {
+                return document.getElementById('splitters_regexp_input').value;
+            }
+        };
+
+        var current_list;
+
+        var keys_list=[];
+        var values_list=[];
+
+        var splitter_exp = '{|splitter|}';
+        
+        function buildArrayView() {
+            console.log('buildArrayView');
+
+            if(this.id == 'toKeys'){
+                keys_list = current_list.slice();
+            }else if(this.id == 'toValues'){
+                values_list = current_list.slice();
+            }
+
+            console.log(keys_list);
+            console.log(values_list);
+
+            var html = '';
+
+            keys_list.forEach(function (item,i) {
+
+                console.log(i);
+                if(values_list[i] == undefined ){
+                    html += '"' + item +'"=>"",\n'
+                }else{
+                    html += '"' + item +'"=>"'+values_list[i]+'",\n'
+                }
+
+
+            });
+            document.getElementById("deviceListArr").innerHTML = html.slice(0, html.length - 2);
+        }
+
+        function toObject(arr) {
+            var rv = {};
+            for (var i = 0; i < arr.length; ++i)
+                rv[i] = arr[i];
+            return rv;
+        }
+        
+
+        function sliceData() {
+
+            //get our text field
+            var string =  document.getElementById('textField').value;
+
+            //apply all settings
+            var settings = document.querySelectorAll('.settings:checked');
+            settings = Array.prototype.slice.call(settings, 0);
+
+            var configs = document.querySelectorAll('.config:checked');
+            configs = Array.prototype.slice.call(configs, 0);
+
+
+            //check for splitters or settings
+            if (settings && settings.length > 0) {
+                settings.forEach(function (item) {
+                    var expression = toReplace[item.name];
+                    if(typeof  expression == 'function'){
+                        expression = expression();
+                    }
+                    string = string.replace(new RegExp(expression, 'g'), splitter_exp);
+                });
+            }
+
+            //split string
+            current_list = string.split(splitter_exp).clean('');
+
+            //apply all configs
+            if (configs && configs.length > 0) {
+                configs.forEach(function (item) {
+                    if(item.name == 'config_unique'){
+                        current_list = current_list.unique();
+                    }
+                });
+            }
+
+            //output
+            var output = '';
+            current_list.forEach(function (val, key) {
+                output += "'" + val.trim() + "',<br>";
+            });
+
+            document.getElementById("deviceList").innerHTML = output.slice(0, output.length - 5);
+        }
+
+        Array.prototype.clean = function (deleteValue) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == deleteValue) {
+                    this.splice(i, 1);
+                    i--;
+                }
+            }
+            return this;
+        };
+
+        Array.prototype.contains = function (v) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] === v) return true;
+            }
+            return false;
+        };
+
+        Array.prototype.unique = function () {
+            var arr = [];
+            for (var i = 0; i < this.length; i++) {
+                if (!arr.contains(this[i])) {
+                    arr.push(this[i]);
+                }
+            }
+            return arr;
+        };
+
+    </script>
+</head>
+
+<body>
+<div class="page-header">
+    <h1>Разделитель</h1>
+</div>
+<div class='error_block'></div>
+<h3>Split by</h3>
+<label>
+    Space
+    <input class="action settings" type="checkbox" name="splitters_space">
+</label>
+<label>
+    Enter
+    <input class="action settings" type="checkbox" name="splitters_enter">
+</label>
+<label>
+    Tab
+    <input class="action settings" type="checkbox" name="splitters_tab">
+</label>
+<label>
+    regexp
+    <input class="action settings" type="checkbox" name="splitters_regexp">
+    <input class="action settings" type="text" name="splitters_regexp_input" id="splitters_regexp_input">
+</label>
+<h3>Settings</h3>
+<label>
+    unique
+    <input class="action config" type="checkbox" name="config_unique">
+</label>
+<form class="form-horizontal" >
+    <textarea class="action form-control" placeholder="Текст" id="textField"
+              cols="50" rows="15"></textarea><br>
+    <button type="button" id="toKeys" role="button">As keys</button>
+    <button type="button" id="toValues">As values</button>
+</form>
+<pre>
+    <div id='deviceListArr'></div>
+</pre>
+<code>
+    <div id='deviceList'></div>
+</code>
+</body>
+</html>
