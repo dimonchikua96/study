@@ -13,10 +13,13 @@
   "license": "ISC",
   "dependencies": {
     "chai": "^3.5.0",
-    "express": "^4.15.2",
-    "mocha": "^3.3.0",
+    "express": "^4.15.3",
+    "mocha": "^3.4.2",
     "nn": "0.0.6",
     "request": "^2.81.0",
-    "socket.io": "^1.7.3"
+    "socket.io": "^1.7.4"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1"
   }
 }
