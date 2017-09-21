@@ -10,7 +10,6 @@
     <script type="application/javascript" src="bootstrap/bootstrap3/js/bootstrap.min.js"></script>
 </head>
 <body>
-
 <div class="container">
     <div class="panel panel-primary">
 
