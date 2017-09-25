@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <script type="application/javascript">
+        var Typer = (function () {
+            var minDelay,maxDelay,sourceId,targetId;
+            var newVal = '';
+            var i = 0;
+
+            function setNewVal(sourceVal) {
+                setTimeout(function () {
+                    if (i < sourceVal.length) {
+                        newVal += sourceVal[i];
+                        setNewVal(sourceVal);
+                        i++;
+                    }else{
+                        sourceVal='';
+                        i=0;
+                    }
+                }, Math.floor(Math.random() * maxDelay) + minDelay);
+
+                document.getElementById(targetId).innerHTML = newVal;
+            }
+            return {
+                init: function (config) {
+                    minDelay = config.minDelay;
+                    maxDelay = config.maxDelay;
+                    sourceId = config.sourceId;
+                    targetId = config.targetId;
+                },
+                start: function () {
+                    var sourceVal = document.getElementById(sourceId).value;
+                    console.log(sourceVal);
+                    if (sourceVal != undefined && sourceVal.length > 0) {
+                        if (i < sourceVal.length) {
+                            newVal += sourceVal[i];
+                            setNewVal(sourceVal);
+                            i++;
+                        }
+                    } else {
+                        document.getElementById("target").innerHTML = '';
+                    }
+                }
+            }
+        }());
+
+        document.addEventListener("DOMContentLoaded", function (event) {
+
+            Typer.init({
+                sourceId: 'source',
+                targetId: 'target',
+                minDelay: 50,
+                maxDelay: 100
+            });
+
+            document.getElementById('source').addEventListener("keyup", function () {
+                Typer.start();
+            });
+
+        });
+
+
+    </script>
+</head>
+<body>
+<input type="text" id="source">
+<div id='target'></div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html ng-app ='TestModule'>
+<head>
+    <script src="../resources/js/angular/angular.js"></script>
+    <link rel="stylesheet" href="../resources/css/bootstrap.min.css">
+    <script src="demo.js"></script>
+</head>
+<body>
+<script type="application/javascript">
+
+
+</script>
+<div class="container">
+    <hr>
+    ng-model <br><br>
+    <label>Имя:</label>
+    <input type="text" ng-model="yourName" placeholder="Введите свое имя">
+    <h1>Привет {{yourName | uppercase}}!</h1>
+    <hr>
+    ng-hide <br><br>
+    <input type="checkbox" ng-model="ShowBlock">ShowBlock
+    <input type="checkbox" ng-model="HideBlock">HideBlock
+    <div ng-hide="HideBlock">Блок который надо скрыть</div>
+    <div ng-show="ShowBlock">Блок который надо показать</div>
+    <hr>
+    ng-controller <br><br>
+    <div ng-controller = "TestCtrl">
+        My name is {{name}}
+    </div>
+
+    <hr>
+    ng-repeat <br><br>
+    <div ng-controller = "DemoCtrl">
+        My name is {{testVar}}<br>
+        lifesearch:
+        <input ng-model = 'phoneName' type="text">
+        <ul>
+            <li ng-repeat="phone in phones | filter:phoneName | orderBy:sortField">
+                {{phone.name}} - {{phone.descr}}
+            </li>
+        </ul>
+        Всего телефонов: {{phones.length}}
+    </div>
+    <hr>
+    ng-click <br><br>
+    <div ng-controller = "ClickCtrl">
+
+        <button ng-click = "clickButton()">OK</button>
+        Hello {{name}}!
+
+
+    </div>
+    <hr>
+    filtering <br><br>
+    <div ng-controller = "DemoCtrl">
+        <ul>
+            <li>Дата: {{today | date:'dd-MM-yyyy'}}</li>
+            <li>Число:{{34141.32 | number:3}}</li>
+            <li>Uppercase: {{'Uppercase' | uppercase}}</li>
+            <li>lowercase: {{'LOWERCASE' |  lowercase}}</li>
+            <li>JSON:<pre>{{ {'text1':'text', 'text2':'text'} | json}}</pre></li>
+
+        </ul>
+    </div>
+    <hr>
+    sorting <br><br>
+    <div ng-controller = "DemoCtrl">
+        My name is {{testVar}}<br>
+        lifesearch:
+        <input ng-model = 'phoneName' type="text"><br><br>
+
+        <table class="table table-bordered" style="width: auto;">
+            <thead>
+            <tr>
+                <th ng-click="sort('name')">name <i ng-class="{'glyphicon glyphicon-chevron-up':isUp('name'),
+                                                       'glyphicon glyphicon-chevron-down':isDown('name')}"></th>
+                <th ng-click="sort('descr')">description <i ng-class="{'glyphicon glyphicon-chevron-up':isUp('descr'),
+                                                       'glyphicon glyphicon-chevron-down':isDown('descr')}"></th>
+            </tr>
+            </thead>
+            <tbody style="border: solid 1px">
+            <tr ng-repeat="phone in phones | filter:phoneName | orderBy:sortFieldOnClick:reverse">
+                <td>{{phone.name}}</td>
+                <td>{{phone.descr}}</td>
+            </tr>
+            </tbody>
+            <tfoot style="border: solid 1px">
+            <tr>
+                <th>end</th>
+                <th>end</th>
+            </tr>
+            </tfoot>
+        </table>
+
+        Всего телефонов: {{phones.length}}
+    </div>
+    <hr>
+    $http <br><br>
+    <div ng-controller = "PhoneListCtrl">
+        <ul>
+            <li ng-repeat="phone in phones">
+                {{phone.name}}
+            </li>
+        </ul>
+    </div>
+
+
+
+
+</div>
+</body>
+</html>

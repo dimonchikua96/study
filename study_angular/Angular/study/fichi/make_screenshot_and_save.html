@@ -1,0 +1,44 @@
+<!doctype html>
+<html ng-app="app">
+<head>
+    <script src="http://code.angularjs.org/1.4.5/angular.min.js"></script>
+    <script type="text/javascript" src="https://github.com/niklasvh/html2canvas/releases/download/0.5.0-alpha1/html2canvas.js"></script>
+    <script type="application/javascript">
+        var app = angular.module('app', []);
+        app.controller('canvasCTRL', function ($scope) {
+            //отслеживаем нажатие кнопочки
+            $scope.download = function (filename,block_id) {
+                html2canvas(document.getElementById(block_id), {
+                    onrendered: function (canvas) {
+                        var link = document.createElement('a');
+                        document.body.appendChild(link);
+                        link.download = filename+'.png';
+                        link.href = canvas.toDataURL("image/png");
+                        link.click();
+                        link.remove()
+                    }
+                });
+            };
+        });
+    </script>
+</head>
+<body ng-controller="canvasCTRL">
+<table id="users" border="1">
+    <tr>
+        <td>user1</td>
+        <td>Dima</td>
+    </tr>
+    <tr>
+        <td>user2</td>
+        <td>Serega</td>
+    </tr>
+    <tr>
+        <td>user3</td>
+        <td>Mikhailo</td>
+    </tr>
+</table>
+<button ng-click="download('filename','users')">Download</button>
+</body>
+</html>
+
+

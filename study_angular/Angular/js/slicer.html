@@ -1,0 +1,72 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>Slicer</title>
+    <meta name="description" content="Slicer">
+
+    <script type="application/javascript">
+        function sliceData (str) {
+
+            //var exp =/[^a-zA-Z0-9]/;
+            //var list = deviceList.replace(/\n/g, " ").split(" ").clean('').unique().upper();
+            var list = str.replace(/\n/g, " ").split(" ").clean('');
+            var output = '';
+            list.forEach(function (val,key) {
+                output += "'"+val + "',<br>";
+            });
+            document.getElementById("deviceList").innerHTML = output.slice(0,output.length-5);
+        }
+
+        Array.prototype.clean = function (deleteValue) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == deleteValue) {
+                    this.splice(i, 1);
+                    i--;
+                }
+            }
+            return this;
+        };
+
+        Array.prototype.contains = function (v) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] === v) return true;
+            }
+            return false;
+        };
+
+        Array.prototype.unique = function () {
+            var arr = [];
+            for (var i = 0; i < this.length; i++) {
+                if (!arr.contains(this[i])) {
+                    arr.push(this[i]);
+                }
+            }
+            return arr;
+        };
+
+        Array.prototype.upper = function () {
+            var arr = [];
+            for (var i = 0; i < this.length; i++) {
+                arr.push(this[i].toUpperCase());
+            }
+            return arr;
+        };
+    </script>
+</head>
+
+<body>
+    <div class="page-header">
+        <h1>Разделитель</h1>
+    </div>
+    <div class='error_block'></div>
+    <form class="form-horizontal">
+        <textarea onchange="sliceData(this.value)" onkeyup="sliceData(this.value)" class="form-control" placeholder="Текст" cols="50" rows="15"></textarea>
+    </form>
+    <code>
+        <div id='deviceList'></div>
+    </code>
+</body>
+</html>

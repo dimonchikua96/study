@@ -1,0 +1,111 @@
+<!doctype html>
+<html ng-app="store">
+<head>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="/angular/resources/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/angular/resources/css/app.css">
+
+</head>
+<body>
+<br>
+<div class="container" ng-controller="StoreCtrl as store">
+    <div class="col-md-12 sidebar-offcanvas" id="sidebar">
+        <h3 class="text-center">Фильтр телефонов</h3>
+        <div class="list-group">
+            <div class="list-group-item text-center">
+                <form>
+                    <input type="text" class="form-control" placeholder="Search..." ng-model="search">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <section ng-init="tab=1" ng-controller="PanelController as panel">
+        <ul class="nav nav-pills">
+            <li ng-class="{active : panel.isSelected(1)}"><a href ng-click="panel.selectTab(1)">Tab 1</a></li>
+            <li ng-class="{active : panel.isSelected(2)}"><a href ng-click="panel.selectTab(2)">Tab 2</a></li>
+            <li ng-class="{active : panel.isSelected(3)}"><a href ng-click="panel.selectTab(3)">Tab 3</a></li>
+        </ul>
+
+    <div class="panel" ng-show="panel.isSelected(1)">
+        <h4>Tab 1</h4>
+        <p>Description</p>
+    </div>
+    <div class="panel" ng-show="panel.isSelected(2)">
+        <h4>Tab 1</h4>
+        <p>Description on the second tab</p>
+    </div>
+    <div class="panel" ng-show="panel.isSelected(3)">
+        <h4>Tab 1</h4>
+        <p>Description appears when tab 3 clicked</p>
+    </div>
+    </section>
+    <h4>Reviews</h4>
+    <blockquote ng-repeat="review in reviews">
+        <b>{{review.stars}} stars</b>
+        <div class="progress" style="width: 200px">
+            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="5" style="width: {{review.stars*20}}%"></div>
+        </div>
+        <p>{{review.body}}</p>
+        <b>Author:</b>{{review.author}}<br>
+    </blockquote>
+
+    <form name="reviewForm"  ng-controller="ReviewCtrl"
+          ng-submit="addReview(reviews)"  style="width: 300px">
+        <blockquote>
+            <b>{{review.stars}} stars</b>
+            <div class="progress" style="width: 200px">
+                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="5" style="width: {{review.stars*20}}%"></div>
+            </div>
+            <p>{{review.body}}</p>
+            <b>Author:</b>{{review.author}}<br>
+        </blockquote>
+        <select class="form-control" ng-model="review.stars">
+            <option value="1">1 stars</option>
+            <option value="2">2 stars</option>
+            <option value="3">3 stars</option>
+            <option value="4">4 stars</option>
+            <option value="5">5 stars</option>
+        </select><br>
+        <textarea class="form-control" ng-model="review.body"></textarea><br>
+        <label>by:</label>
+        <input type="email" class="form-control" ng-model="review.author"><br>
+        <input type="submit" value="Submit" class="btn btn-default">
+    </form>
+
+
+
+
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-lg-4 item" ng-repeat="phone in phones | filter: search">
+            <div class="preview-img text-center">
+                <img ng-src="../{{phone.imageUrl}}" alt="{{phone.name}}"/>
+            <span class="label"
+                  ng-init="status = phone.status ? 'Есть в наличии' : 'Под заказ'"
+                  ng-class="{'label-success':phone.status, 'label-warning': !phone.status}">
+              {{status}}
+            </span>
+            </div>
+            <h2>{{phone.name}}</h2>
+            <p>{{phone.snippet}}</p>
+            <p><a class="btn btn-default" href="#/phones/{{phone.id}}" role="button">View details &raquo;</a></p>
+        </div><!--/.col-sm-6.col-lg-4-->
+    </div>
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+
+</div>
+<script src="/angular/resources/js/angular/angular.min.js"></script>
+<script src="store.js"></script>
+</body>
+</html>
+
+
+
+

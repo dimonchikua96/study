@@ -1,0 +1,34 @@
+<!doctype html>
+<html ng-app='App'>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script src="js/angular-1.4.5/angular.min.js"></script>
+    <script src="js/script.js"></script>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        .left_2{
+            margin-left: 2%;
+        }
+        .right{
+            text-align: right;
+        }
+        .bold{
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container" ng-controller="myCtrl">
+    <br>
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+
+        <div class="panel-heading">Пользователи</div>
+        <ng-include src="'views/user_table.html'" ng-show = "currentView == 'userTable'"></ng-include>
+        <ng-include src="'views/add_user.html'" ng-show = "currentView == 'addUser'"></ng-include>
+        <!-- Table -->
+
+    </div>
+</div>
+</body>
+</html>

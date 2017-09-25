@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="itvdn">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="/angular/resources/js/angular/angular.min.js"></script>
+    <script type="application/javascript">
+
+
+        var itvdn = angular.module('itvdn', []);
+        itvdn.controller('DemoCtrl', function ($scope, Storage,uid) {
+            $scope.name = '';
+
+            //получаем всех пользователей из базы
+            $scope.users = Storage.get();
+
+            console.log('$watch.users=' + $scope.users[0]);
+
+            //отслеживаем изменение переменной users
+            $scope.$watch('users', function () {
+                Storage.put($scope.users);
+            }, true);
+
+            //добавляем в массив пользователей нового пользователя
+            $scope.addUser = function () {
+                if (!$scope.name.length) {
+                    return;
+                }
+                var id = uid.get;
+                console.log(id);
+                $scope.users[id] = {id:id, name: $scope.name};
+            };
+
+            $scope.deleteUser = function (index) {
+                $scope.users.splice(index, 1);
+            };
+
+
+        });
+
+        itvdn.factory('Storage', function () {
+            var STORAGE_ID = 'users';
+
+            return {
+                get: function () {
+                    return JSON.parse(localStorage.getItem(STORAGE_ID) || '[]');
+                },
+
+                put: function (data) {
+                    localStorage.setItem(STORAGE_ID, JSON.stringify(data));
+                }
+            };
+        });
+
+        itvdn.factory('uid', function () {
+            return {
+                get: 'id-' + Math.random().toString(36).substr(2, 16)
+            };
+        });
+
+    </script>
+</head>
+<body>
+<div ng-controller="DemoCtrl">
+
+
+    <form>
+
+        <label>
+            Имя
+            <input type="text" ng-model="name">
+        </label>
+        <input type="button" value="Добавить" ng-click="addUser()">
+
+    </form>
+
+    <table ng-show="users.length" border="1">
+        <tr ng-repeat="user in users track by $index">
+            <td>{{$index+1}}</td>
+            <td>{{user.name}}</td>
+            <td><button type="button" ng-click="deleteUser($index)">Удалить</button></td>
+        </tr>
+    </table>
+
+
+</div>
+
+
+</body>
+</html>
